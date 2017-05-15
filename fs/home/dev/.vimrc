@@ -23,8 +23,10 @@ set ts=4
 set sw=4
 set number
 set cursorline
-set scrolloff=999
+set scrolloff=5
 set encoding=utf-8
+set mouse=a
+set backspace=2
 colorscheme molokai
 
 " plugin customizations
