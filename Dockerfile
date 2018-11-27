@@ -5,7 +5,7 @@ ADD fs/ /
 
 # install pagkages
 RUN apt-get update                                                      && \
-    apt-get install -y ncurses-dev libtolua-dev exuberant-ctags         && \
+    apt-get install -y ncurses-dev libtolua-dev exuberant-ctags fish    && \
     ln -s /usr/include/lua5.2/ /usr/include/lua                         && \
     ln -s /usr/lib/x86_64-linux-gnu/liblua5.2.so /usr/lib/liblua.so     && \
     cd /tmp                                                             && \
@@ -14,7 +14,7 @@ RUN apt-get update                                                      && \
     cd vim                                                              && \
     ./configure --with-features=huge --enable-luainterp                    \
         --enable-gui=no --without-x --prefix=/usr                       && \
-    make VIMRUNTIMEDIR=/usr/share/vim/vim80                             && \
+    make VIMRUNTIMEDIR=/usr/share/vim/vim81                             && \
     make install                                                        && \
 # get go tools
     go get golang.org/x/tools/cmd/godoc                                 && \
@@ -31,6 +31,7 @@ RUN apt-get update                                                      && \
     adduser dev --disabled-password --gecos ""                          && \
     echo "ALL            ALL = (ALL) NOPASSWD: ALL" >> /etc/sudoers     && \
     chown -R dev:dev /home/dev /go                                      && \
+    sed -i -e "s/bin\/bash/usr\/bin\/fish/" /etc/passwd                 && \
 # cleanup
     rm -rf /go/src/* /go/pkg                                            && \
     apt-get remove -y ncurses-dev                                       && \
@@ -39,8 +40,12 @@ RUN apt-get update                                                      && \
 
 USER dev
 ENV HOME /home/dev
+ENV SHELL /usr/bin/fish
 
 # install vim plugins
 RUN curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim && \
     vim +PlugInstall +qall
+
+ENTRYPOINT ["fish"]
+
