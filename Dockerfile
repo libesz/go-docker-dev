@@ -5,11 +5,8 @@ ADD fs/ /
 
 # install pagkages
 RUN apt-get update                                                      && \
-    apt-get install -y ncurses-dev libtolua-dev exuberant-ctags fish       \
-    sudo                                                                && \
-    ln -s /usr/include/lua5.2/ /usr/include/lua                         && \
-    ln -s /usr/lib/x86_64-linux-gnu/liblua5.2.so /usr/lib/liblua.so     && \
-# cleanup
+    apt-get install -y ncurses-dev libtolua-dev exuberant-ctags sudo       \
+    zsh                                                                 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # build and install vim
@@ -41,7 +38,6 @@ RUN go get golang.org/x/tools/cmd/godoc                                 && \
 RUN adduser dev --disabled-password --gecos ""                          && \
     echo "ALL            ALL = (ALL) NOPASSWD: ALL" >> /etc/sudoers     && \
     chown -R dev:dev /home/dev /go                                      && \
-    sed -i -e "s/bin\/bash/usr\/bin\/fish/" /etc/passwd                 && \
 # cleanup
     rm -rf /go/src/* /go/pkg                                            && \
     apt-get remove -y ncurses-dev                                       && \
@@ -50,12 +46,15 @@ RUN adduser dev --disabled-password --gecos ""                          && \
 
 USER dev
 ENV HOME /home/dev
-ENV SHELL /usr/bin/fish
 
 # install vim plugins
 RUN curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim && \
-    vim +PlugInstall +qall
+    vim +'silent :PlugInstall' +qall && \
+    vim +'silent :GoInstallBinaries' +qall
 
-ENTRYPOINT ["fish"]
+RUN touch ~/.zshrc containing && unset ZSH && \
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+
+ENTRYPOINT ["zsh"]
 
